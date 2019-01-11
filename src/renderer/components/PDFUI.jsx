@@ -30,8 +30,8 @@ export default class PDFUI extends React.Component {
         }
 
         return Promise.all(loadingImages.map((image) => {
-            new Promise((resolve) => image.onload = () => resolve()));
-        });
+            new Promise((resolve) => image.onload = () => resolve());
+        }));
     }
 
     render() {
