@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app, ipcMain } from "electron";
 import createMainWindow from "./createMainWindow";
 import createPDFWindow from "./createPDFWindow";
 import setAppMenu from "./setAppMenu";
@@ -48,6 +48,14 @@ function exportPDF() {
             });
         });
 }
+
+ipcMain.on("NEW_STORAGE", (event, arg) => {
+    console.log("NEW_STORAGE was received");
+});
+
+ipcMain.on("GET_STORAGE_LIST", (event, arg) => {
+    console.log("GET_STORAGE_LIST was received");
+});
 
 app.on("ready", () => {
     mainWindow = createMainWindow();
