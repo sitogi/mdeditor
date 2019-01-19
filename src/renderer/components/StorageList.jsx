@@ -9,13 +9,18 @@ const BUTTON_STYLE = {
     margin: 10
 };
 
+const FOLDER_STYLE = {
+    "text-indent": "1em"
+};
+
 export default class StorageList extends React.Component {
 
    constructor(props) {
         super(props);
         this.state = {
-            currentStorageId: "",
-            storages: [ { key: "key1", name: "name1" }, { key: "key2", name: "name2" } ]
+            currentStoragePath: "",
+            storages: [],
+            currentFolderPath: ""
         };
 
        this.handleOnSubmit = this.handleOnSubmit.bind(this);
@@ -29,23 +34,32 @@ export default class StorageList extends React.Component {
         // TODO
         ipcRenderer.send("NEW_STORAGE");
         const storages = this.state.storages;
-        storages.push({ key: "key", name: "name" });
-        this.setState({ storages });
+     //   storages.push({ path: "name" });
+     //   this.setState({ storages });
         
     }
 
-    onClick(e, storage) {
-        this.setState({ currentStorageId: storage.key });
+    onClickStorage(e, storage) {
+        this.setState(
+            { 
+                currentStoragePath: storage.path,
+                currentFolderPath: ""
+            }
+        );
+    };
+
+    onClickFolder(e, folder) {
+        this.setState({ currentFolderPath: folder.path });
     };
 
     getStorageList() {
-        ipcRenderer.send("GET_STORAGE_LIST");
-        // TODO
+        ipcRenderer.send("GET_STORAGES");
+        ipcRenderer.on("SEND_STORAGES", (event, storages) => {
+            this.setState({ storages: storages });
+        });
     }
 
     render() {
-        const Id = "key2";
-
         return (
             <div className="list-storage">
                 <div className="list-storage-header">
@@ -57,16 +71,39 @@ export default class StorageList extends React.Component {
                     </form>
                 </div>
                 {this.state.storages.map(s => {
-                   return (
-//                    <StorageItem storage={s} selected={s.name === this.state.currentStorageId} onClick={this.onClick} />
-                      <div className={s.key === this.state.currentStorageId ? "list-group-item selected" : "list-group-item"}
-                           onClick={e => this.onClick(e, s)}
-                      >
-                         <div id="storageName" className="media-body">
-                             <strong>{s.name}</strong>
-                         </div>
-                     </div>
-                  );
+                   const isSelected = s.path === this.state.currentStoragePath;
+                   if (isSelected) {
+                       return (
+                          <div>
+                              <div className="list-group-item selected" onClick={e => this.onClickStorage(e, s)}>
+                                 <div id="storageName" className="media-body">
+                                     <div>{s.name}</div>
+                                 </div>
+                              </div>
+                              {s.folders.map(f => {
+                                  const isSelected = f.path === this.state.currentFolderPath;
+                                  return (
+                                      <div
+                                        className={isSelected ? "list-group-item selected" : "list-group-item"}
+                                        onClick={e => this.onClickFolder(e, f)}
+                                      >
+                                          <div id="folderName" className="media-body">
+                                              <div style={FOLDER_STYLE}>{f.name}</div>
+                                          </div>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                       );
+                   } else {
+                       return (
+                          <div className="list-group-item" onClick={e => this.onClickStorage(e, s)}>
+                            <div id="storageName" className="media-body">
+                                 <div>{s.name}</div>
+                             </div>
+                          </div>
+                       );
+                   }
                 })}
             </div>
         );

@@ -2,7 +2,6 @@ import React from "react";
 import { ipcRenderer } from "electron";
 
 import StorageList from "./StorageList";
-import NoteList from "./NoteList";
 import Editor from "./Editor";
 import Previewer from "./Previewer";
 import style from "./MarkdownEditorUI.css";
@@ -74,7 +73,6 @@ export default class MarkDownEditorUI extends React.Component {
                 onKeyDown={this.onKeyDown}
             >
                 <StorageList />
-                <NoteList />
                 { this.renderEditor() }
                 { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
             </div>

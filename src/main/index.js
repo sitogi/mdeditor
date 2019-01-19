@@ -33,6 +33,14 @@ function saveAsNewFile() {
         .catch((error) => console.log(error));
 }
 
+function loadMetaInfo() {
+    const metaFilePath = fileManager.join(fileManager.getHomeDir(), ".takanote");
+    if (!fileManager.exist(metaFilePath)) {
+        fileManager.create(metaFilePath);
+    }
+    return JSON.parse(fileManager.load(metaFilePath)); 
+}
+
 function exportPDF() {
     Promise.all([ showExportPDFDialog(), mainWindow.requestText() ])
         .then(([ filePath, text ]) => {
@@ -50,11 +58,24 @@ function exportPDF() {
 }
 
 ipcMain.on("NEW_STORAGE", (event, arg) => {
+    // TODO    
     console.log("NEW_STORAGE was received");
 });
 
-ipcMain.on("GET_STORAGE_LIST", (event, arg) => {
-    console.log("GET_STORAGE_LIST was received");
+ipcMain.on("GET_STORAGES", (event, arg) => {
+    const metaInfo = loadMetaInfo();
+    const storages = fileManager.createStorageStructures(metaInfo.storages);
+    event.sender.send("SEND_STORAGES", storages);
+});
+
+ipcMain.on("GET_FOLDERS", (event, arg) => {
+    // TODO
+    console.log("GET_FOLDERS was called");
+});
+
+ipcMain.on("NEW_FOLDER", (event, arg) => {
+    // TODO
+    console.log("NEW_FOLDER");
 });
 
 app.on("ready", () => {
