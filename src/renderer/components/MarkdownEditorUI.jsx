@@ -12,10 +12,15 @@ export default class MarkDownEditorUI extends React.Component {
         super(props);
         this.state = {
             text: "",
-            showPreviewer: true
+            showPreviewer: true,
+            storages: [],
+            currentStoragePath: "",
+            currentFolderPath: ""
         };
         this.onChangeText = this.onChangeText.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+        this.onClickStorage = this.onClickStorage.bind(this);
+        this.onClickFolder = this.onClickFolder.bind(this);
     }
 
     onChangeText(e) {
@@ -31,8 +36,29 @@ export default class MarkDownEditorUI extends React.Component {
         }
     }
 
-    // Component が View にマウントされる際に呼び出される
+    onClickStorage(e, storage) {
+        this.setState(
+            {
+                currentStoragePath: storage.path,
+                currentFolderPath: ""
+            }
+        );
+    };
+
+    onClickFolder(e, folder) {
+        this.setState({ currentFolderPath: folder.path });
+    };
+
+    getStorageList() {
+        ipcRenderer.send("GET_STORAGES");
+        ipcRenderer.on("SEND_STORAGES", (event, storages) => {
+            this.setState({ storages: storages });
+        });
+    }
+
     componentDidMount() {
+        this.getStorageList();
+
         ipcRenderer.on("REQUEST_TEXT", () => {
             ipcRenderer.send("REPLY_TEXT", this.state.text);
         });
@@ -42,7 +68,6 @@ export default class MarkDownEditorUI extends React.Component {
         });
     }
 
-    // Component が View からアンマウントされる際に呼び出される
     componentWillUnmount() {
         ipcRenderer.removeAllListeners();
     }
@@ -72,7 +97,13 @@ export default class MarkDownEditorUI extends React.Component {
                 tabIndex="0"
                 onKeyDown={this.onKeyDown}
             >
-                <StorageList />
+                <StorageList
+                    storages={this.state.storages}
+                    currentStoragePath={this.state.currentStoragePath}
+                    currentFolderPath={this.state.currentFolderPath}
+                    onClickStorage={this.onClickStorage}
+                    onClickFolder={this.onClickFolder}
+                />
                 { this.renderEditor() }
                 { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
             </div>
