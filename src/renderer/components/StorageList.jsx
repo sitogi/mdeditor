@@ -1,6 +1,10 @@
 import React from "react";
 import { ipcRenderer } from "electron";
 
+const STORAGE_LIST_STYLE = {
+    width: "15%"
+};
+
 const FORM_STYLE = {
     display: "flex"
 };
@@ -27,7 +31,7 @@ export default class StorageList extends React.Component {
 
     render() {
         return (
-            <div className="list-storage">
+            <div className="list-storage" style={STORAGE_LIST_STYLE}>
                 <div className="list-storage-header">
                     <form style={FORM_STYLE} onSubmit={this.handleOnSubmit}>
                         <strong>Storage </strong>

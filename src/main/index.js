@@ -78,6 +78,16 @@ ipcMain.on("NEW_FOLDER", (event, arg) => {
     console.log("NEW_FOLDER");
 });
 
+ipcMain.on("OPEN_NOTE", (event, filePath) => {
+    fileManager.openFile(filePath)
+        .then((content) => event.sender.send("NOTE_TEXT", content))
+        .catch((error) => console.log(error));
+});
+
+ipcMain.on("WRITE_NOTE", (event, note) => {
+    fileManager.saveFile(note.path, note.content);
+});
+
 app.on("ready", () => {
     mainWindow = createMainWindow();
     fileManager = createFileManager();

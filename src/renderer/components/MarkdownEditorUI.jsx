@@ -2,9 +2,16 @@ import React from "react";
 import { ipcRenderer } from "electron";
 
 import StorageList from "./StorageList";
+import NoteList from "./NoteList";
 import Editor from "./Editor";
 import Previewer from "./Previewer";
 import style from "./MarkdownEditorUI.css";
+
+const EDITOR_AND_PREVIERWER_STYLE = {
+    "display": "flex",
+    "flex-direction": "row",
+    "width": "70%"
+};
 
 export default class MarkDownEditorUI extends React.Component {
 
@@ -15,16 +22,20 @@ export default class MarkDownEditorUI extends React.Component {
             showPreviewer: true,
             storages: [],
             currentStoragePath: "",
-            currentFolderPath: ""
+            currentFolderPath: "",
+            currentNotePath: ""
         };
         this.onChangeText = this.onChangeText.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onClickStorage = this.onClickStorage.bind(this);
         this.onClickFolder = this.onClickFolder.bind(this);
+        this.onClickNote = this.onClickNote.bind(this);
     }
 
     onChangeText(e) {
         this.setState({ text: e.target.value });
+        const note = { path: this.state.currentNotePath, content: e.target.value};
+        ipcRenderer.send("WRITE_NOTE", note);
     }
 
     onKeyDown(e) {
@@ -49,9 +60,20 @@ export default class MarkDownEditorUI extends React.Component {
         this.setState({ currentFolderPath: folder.path });
     };
 
+    onClickNote(e, note) {
+        ipcRenderer.send("OPEN_NOTE", this.state.currentFolderPath + "/" + note + "/content.md");
+        ipcRenderer.once("NOTE_TEXT", (event, content) => {
+            this.setState({
+                text: content
+            });
+        });
+        // TODO ノートのパスも最初から保持しておくべき
+        this.setState({ currentNotePath: this.state.currentFolderPath + "/" + note + "/content.md" });
+    };
+
     getStorageList() {
         ipcRenderer.send("GET_STORAGES");
-        ipcRenderer.on("SEND_STORAGES", (event, storages) => {
+        ipcRenderer.once("SEND_STORAGES", (event, storages) => {
             this.setState({ storages: storages });
         });
     }
@@ -104,11 +126,38 @@ export default class MarkDownEditorUI extends React.Component {
                     onClickStorage={this.onClickStorage}
                     onClickFolder={this.onClickFolder}
                 />
-                { this.renderEditor() }
-                { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
+                <NoteList
+                    noteList={this.getCurrentNoteList()}
+                    currentNote={this.state.currentNote}
+                    onClickNote={this.onClickNote}
+                />
+                <div id="editorAndPreviewer" style={EDITOR_AND_PREVIERWER_STYLE}>
+                    { this.renderEditor() }
+                    { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
+                </div>
             </div>
         );
     }
  
+    getCurrentNoteList() {
+        const targetStorage = this.state.currentStoragePath;
+        const targetFolder = this.state.currentFolderPath;
+       
+        if (!targetStorage || !targetFolder) {
+            return [];
+        }
+        
+        const storage = this.state.storages.find(s => s.path === targetStorage);
+        if (!storage) {
+            return [];
+        }
+        const folder = storage.folders.find(f => f.path === targetFolder);
+        if (!folder) {
+            return [];
+        }
+        const noteList = folder.notes;
+        return noteList;
+    }
+
 }
 
