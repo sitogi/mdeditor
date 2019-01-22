@@ -10,7 +10,7 @@ import style from "./MarkdownEditorUI.css";
 const EDITOR_AND_PREVIERWER_STYLE = {
     "display": "flex",
     "flex-direction": "row",
-    "width": "70%"
+    "width": "80%"
 };
 
 export default class MarkDownEditorUI extends React.Component {
@@ -23,7 +23,8 @@ export default class MarkDownEditorUI extends React.Component {
             storages: [],
             currentStoragePath: "",
             currentFolderPath: "",
-            currentNotePath: ""
+            currentNotePath: "",
+            currentNote: "",
         };
         this.onChangeText = this.onChangeText.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
@@ -68,7 +69,9 @@ export default class MarkDownEditorUI extends React.Component {
             });
         });
         // TODO ノートのパスも最初から保持しておくべき
-        this.setState({ currentNotePath: this.state.currentFolderPath + "/" + note + "/content.md" });
+        this.setState({ 
+            currentNote: note,
+            currentNotePath: this.state.currentFolderPath + "/" + note + "/content.md" });
     };
 
     getStorageList() {

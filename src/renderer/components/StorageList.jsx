@@ -2,43 +2,38 @@ import React from "react";
 import { ipcRenderer } from "electron";
 
 const STORAGE_LIST_STYLE = {
-    width: "15%"
+    width: "10%",
+    padding: "1px",
 };
 
-const FORM_STYLE = {
-    display: "flex"
-};
-
-const BUTTON_STYLE = {
-    margin: 10
+const STYLE_HEADER = {
+    "border-bottom": "solid #ddd 1px",
 };
 
 const FOLDER_STYLE = {
-    "text-indent": "1em"
+    "text-indent": "0.5em"
 };
 
 export default class StorageList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleOnSubmit = this.handleOnSubmit.bind(this);
+        this.handleOnClick = this.handleOnClick.bind(this);
     }
 
-    handleOnSubmit(e) {
+    handleOnClick(e) {
         // TODO
         ipcRenderer.send("NEW_STORAGE");
     }
 
     render() {
         return (
-            <div className="list-storage" style={STORAGE_LIST_STYLE}>
-                <div className="list-storage-header">
-                    <form style={FORM_STYLE} onSubmit={this.handleOnSubmit}>
-                        <strong>Storage </strong>
-                        <button className="btn btn-default" style={BUTTON_STYLE}>
-                            <span className="icon icon-plus" />
-                        </button>
-                    </form>
+            <div className="list-group" style={STORAGE_LIST_STYLE}>
+                <div className="list-group-header" style={STYLE_HEADER}>
+                    <div>
+                        <strong>Storages</strong>
+                        <span className="icon icon-plus-squared pull-right" onClick={this.handleOnClick}/>
+                    </div>
                 </div>
                 {this.props.storages.map(s => {
                    const isSelected = s.path === this.props.currentStoragePath;
@@ -46,6 +41,7 @@ export default class StorageList extends React.Component {
                        return (
                           <div>
                               <div className="list-group-item selected" onClick={e => this.props.onClickStorage(e, s)}>
+                                 <span className="media-object icon icon-database pull-left" />
                                  <div id="storageName" className="media-body">
                                      <div>{s.name}</div>
                                  </div>
@@ -54,11 +50,13 @@ export default class StorageList extends React.Component {
                                   const isSelected = f.path === this.props.currentFolderPath;
                                   return (
                                       <div
+                                        style={FOLDER_STYLE}
                                         className={isSelected ? "list-group-item selected" : "list-group-item"}
                                         onClick={e => this.props.onClickFolder(e, f)}
                                       >
+                                          <span className="media-object icon icon-folder pull-left" />
                                           <div id="folderName" className="media-body">
-                                              <div style={FOLDER_STYLE}>{f.name}</div>
+                                              <div>{f.name}</div>
                                           </div>
                                       </div>
                                   );
@@ -68,8 +66,9 @@ export default class StorageList extends React.Component {
                    } else {
                        return (
                           <div className="list-group-item" onClick={e => this.props.onClickStorage(e, s)}>
+                            <span className="media-object icon icon-database pull-left" />
                             <div id="storageName" className="media-body">
-                                 <div>{s.name}</div>
+                                <div>{s.name}</div>
                              </div>
                           </div>
                        );
