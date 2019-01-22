@@ -1,11 +1,6 @@
 import React from "react";
 import { ipcRenderer } from "electron";
 
-const STORAGE_LIST_STYLE = {
-    width: "10%",
-    padding: "1px",
-};
-
 const STYLE_HEADER = {
     "border-bottom": "solid #ddd 1px",
     "font-size": "16px",
@@ -29,7 +24,7 @@ export default class StorageList extends React.Component {
 
     render() {
         return (
-            <div className="list-group" style={STORAGE_LIST_STYLE}>
+            <div className="list-group">
                 <div className="list-group-header" style={STYLE_HEADER}>
                     <div>
                         <strong>Storages</strong>

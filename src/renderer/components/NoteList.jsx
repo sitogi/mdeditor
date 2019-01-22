@@ -1,12 +1,5 @@
 import React from "react";
 
-const STYLE_NOTELIST = {
-    width: "10%",
-    padding: "1px",
-    "border-right": "solid #ddd 1px",
-    "border-left": "solid #ddd 1px",
-};
-
 const STYLE_HEADER = {
     "border-bottom": "solid #ddd 1px",
     "font-size": "16px",
@@ -23,7 +16,7 @@ export default class NoteList extends React.Component {
     
     render() {
         return (
-            <div className="list-group" style={STYLE_NOTELIST}>
+            <div className="list-group">
                 <div className="list-group-header" style={STYLE_HEADER}>
                     <strong>Notes</strong>
                     <span className="icon icon-plus-squared pull-right" />

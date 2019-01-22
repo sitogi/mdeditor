@@ -7,6 +7,18 @@ import Editor from "./Editor";
 import Previewer from "./Previewer";
 import style from "./MarkdownEditorUI.css";
 
+const STORAGE_LIST_STYLE = {
+    width: "10%",                                                     
+    padding: "1px",
+};
+
+const STYLE_NOTE_LIST = {
+    width: "10%",
+    padding: "1px",
+    "border-right": "solid #ddd 1px",
+    "border-left": "solid 1px",
+};
+
 const EDITOR_AND_PREVIERWER_STYLE = {
     "display": "flex",
     "flex-direction": "row",
@@ -118,25 +130,35 @@ export default class MarkDownEditorUI extends React.Component {
         
     render() {
         return (
-            <div className={style.markdownEditor}
-                tabIndex="0"
-                onKeyDown={this.onKeyDown}
-            >
-                <StorageList
-                    storages={this.state.storages}
-                    currentStoragePath={this.state.currentStoragePath}
-                    currentFolderPath={this.state.currentFolderPath}
-                    onClickStorage={this.onClickStorage}
-                    onClickFolder={this.onClickFolder}
-                />
-                <NoteList
-                    noteList={this.getCurrentNoteList()}
-                    currentNote={this.state.currentNote}
-                    onClickNote={this.onClickNote}
-                />
-                <div id="editorAndPreviewer" style={EDITOR_AND_PREVIERWER_STYLE}>
-                    { this.renderEditor() }
-                    { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
+            <div className="window">
+                <div className="window-content">
+                    <div className="pane-group"
+                         tabIndex="0"
+                         onKeyDown={this.onKeyDown}
+                    >
+                        <div className="pane-sm sidebar">
+                            <StorageList
+                                style={STORAGE_LIST_STYLE}
+                                storages={this.state.storages}
+                                currentStoragePath={this.state.currentStoragePath}
+                                currentFolderPath={this.state.currentFolderPath}
+                                onClickStorage={this.onClickStorage}
+                                onClickFolder={this.onClickFolder}
+                            />
+                        </div>
+                        <div className="pane-sm sidebar">
+                            <NoteList
+                                style={STYLE_NOTE_LIST}
+                                noteList={this.getCurrentNoteList()}
+                                currentNote={this.state.currentNote}
+                                onClickNote={this.onClickNote}
+                            />
+                        </div>
+                        <div className="pane" style={EDITOR_AND_PREVIERWER_STYLE}>
+                            { this.renderEditor() }
+                            { this.state.showPreviewer ? this.renderPreviewer() : <div /> }
+                        </div>
+                    </div>
                 </div>
             </div>
         );
