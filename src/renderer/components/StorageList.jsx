@@ -8,10 +8,11 @@ const STORAGE_LIST_STYLE = {
 
 const STYLE_HEADER = {
     "border-bottom": "solid #ddd 1px",
+    "font-size": "16px",
 };
 
 const FOLDER_STYLE = {
-    "text-indent": "0.5em"
+    "text-indent": "0.5em",
 };
 
 export default class StorageList extends React.Component {

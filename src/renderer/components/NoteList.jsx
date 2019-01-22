@@ -9,6 +9,10 @@ const STYLE_NOTELIST = {
 
 const STYLE_HEADER = {
     "border-bottom": "solid #ddd 1px",
+    "font-size": "16px",
+};
+
+const STYLE_ICON = {
 };
 
 export default class NoteList extends React.Component {

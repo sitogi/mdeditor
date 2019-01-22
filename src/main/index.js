@@ -81,7 +81,7 @@ ipcMain.on("NEW_FOLDER", (event, arg) => {
 ipcMain.on("OPEN_NOTE", (event, filePath) => {
     fileManager.openFile(filePath)
         .then((content) => event.sender.send("NOTE_TEXT", content))
-        .catch((error) => console.log(error));
+        .catch((error) => event.sender.send("NOTE_TEXT", error.toString()));
 });
 
 ipcMain.on("WRITE_NOTE", (event, note) => {
