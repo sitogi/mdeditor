@@ -31,6 +31,8 @@ export default class MarkDownEditorUI extends React.Component {
         this.onClickStorage = this.onClickStorage.bind(this);
         this.onClickFolder = this.onClickFolder.bind(this);
         this.onClickNote = this.onClickNote.bind(this);
+        this.refreshStorageList = this.refreshStorageList.bind(this);
+        this.createStorage = this.createStorage.bind(this);
     }
 
     onChangeText(e) {
@@ -74,15 +76,25 @@ export default class MarkDownEditorUI extends React.Component {
             currentNotePath: this.state.currentFolderPath + "/" + note + "/content.md" });
     };
 
-    getStorageList() {
-        ipcRenderer.send("GET_STORAGES");
-        ipcRenderer.once("SEND_STORAGES", (event, storages) => {
-            this.setState({ storages: storages });
+    refreshStorageList() {
+        const storages = ipcRenderer.sendSync("GET_STORAGES");
+        return storages;
+    }
+
+    createStorage(storage) {
+        ipcRenderer.send("CREATE_STORAGE", storage);
+        const storages = this.refreshStorageList();
+        const init = storages.find(s => s.path === storage.path);
+        this.setState({
+            currentStoragePath: storage.path,
+            currentFolderPath: init.folders[0].path,
+            storages: storages,
         });
     }
 
     componentDidMount() {
-        this.getStorageList();
+        const storages = this.refreshStorageList();
+        this.setState({ storages: storages });
 
         ipcRenderer.on("REQUEST_TEXT", () => {
             ipcRenderer.send("REPLY_TEXT", this.state.text);
@@ -128,6 +140,7 @@ export default class MarkDownEditorUI extends React.Component {
                     currentFolderPath={this.state.currentFolderPath}
                     onClickStorage={this.onClickStorage}
                     onClickFolder={this.onClickFolder}
+                    createStorage={this.createStorage}
                 />
                 <NoteList
                     noteList={this.getCurrentNoteList()}

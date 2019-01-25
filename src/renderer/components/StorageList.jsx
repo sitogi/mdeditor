@@ -1,9 +1,14 @@
 import React from "react";
 import { ipcRenderer } from "electron";
+import CreateStorageDialog from "./CreateStorageDialog";
 
 const STORAGE_LIST_STYLE = {
     width: "10%",
     padding: "1px",
+};
+
+const STYLE_FLEX_DIRECTION_ROW = {
+    "flex-direction": "row",
 };
 
 const STYLE_HEADER = {
@@ -19,21 +24,15 @@ export default class StorageList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleOnClick = this.handleOnClick.bind(this);
-    }
-
-    handleOnClick(e) {
-        // TODO
-        ipcRenderer.send("NEW_STORAGE");
     }
 
     render() {
         return (
             <div className="list-group" style={STORAGE_LIST_STYLE}>
                 <div className="list-group-header" style={STYLE_HEADER}>
-                    <div>
+                    <div style={STYLE_FLEX_DIRECTION_ROW}>
                         <strong>Storages</strong>
-                        <span className="icon icon-plus-squared pull-right" onClick={this.handleOnClick}/>
+                        <CreateStorageDialog createStorage={this.props.createStorage}/>
                     </div>
                 </div>
                 {this.props.storages.map(s => {

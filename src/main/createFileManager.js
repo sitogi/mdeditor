@@ -14,6 +14,10 @@ class FileManager {
         });
     }
 
+    saveFileSync(filePath, text) {
+        fs.writeFileSync(filePath, text);
+    }
+
     openFile(filePath) {
         return new Promise((resolve) => {
             const content = fs.readFileSync(filePath, "utf8");
@@ -36,6 +40,10 @@ class FileManager {
 
     create(filePath) {
         fs.writeFileSync(filePath, "");
+    }
+
+    createDirectory(path) {
+        fs.mkdirSync(path);
     }
 
     getHomeDir() {

@@ -41,6 +41,13 @@ function loadMetaInfo() {
     return JSON.parse(fileManager.load(metaFilePath)); 
 }
 
+function updateMetaInfo(metaInfo) {
+    const metaFilePath = fileManager.join(fileManager.getHomeDir(), ".takanote");
+    // TODO ここから頑張る
+    fileManager.saveFileSync(metaFilePath, JSON.stringify(metaInfo, null, "  "));
+
+}
+
 function exportPDF() {
     Promise.all([ showExportPDFDialog(), mainWindow.requestText() ])
         .then(([ filePath, text ]) => {
@@ -57,15 +64,23 @@ function exportPDF() {
         });
 }
 
-ipcMain.on("NEW_STORAGE", (event, arg) => {
-    // TODO    
-    console.log("NEW_STORAGE was received");
+ipcMain.on("CREATE_STORAGE", (event, storage) => {
+    if (fileManager.exist(storage.path)) {
+        return;
+    }
+    fileManager.createDirectory(storage.path);
+    fileManager.createDirectory(fileManager.join(storage.path, "default"));
+
+    const metaInfo = loadMetaInfo(); 
+    metaInfo.storages.push({name: storage.name, path: storage.path});
+
+    updateMetaInfo(metaInfo);
 });
 
 ipcMain.on("GET_STORAGES", (event, arg) => {
     const metaInfo = loadMetaInfo();
     const storages = fileManager.createStorageStructures(metaInfo.storages);
-    event.sender.send("SEND_STORAGES", storages);
+    event.returnValue = storages;
 });
 
 ipcMain.on("GET_FOLDERS", (event, arg) => {
