@@ -29,7 +29,7 @@ export default class NoteList extends React.Component {
                     <span className="icon icon-plus-squared pull-right" />
                 </div>
                 {this.props.noteList.map(note => {
-                    const isSelected = note === this.props.currentNote;
+                    const isSelected = note.path === this.props.currentNotePath;
                     return (
                         <div
                             className={isSelected ? "list-group-item selected" : "list-group-item"}
@@ -37,7 +37,7 @@ export default class NoteList extends React.Component {
                         >
                             <span className="media-object icon icon-doc-text pull-left" />
                             <div id="noteName" className="media-body">
-                                <div>{note}</div> 
+                                <div>{note.title}</div> 
                             </div>
                         </div>
                     );

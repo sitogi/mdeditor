@@ -24,7 +24,6 @@ export default class MarkDownEditorUI extends React.Component {
             currentStoragePath: "",
             currentFolderPath: "",
             currentNotePath: "",
-            currentNote: "",
         };
         this.onChangeText = this.onChangeText.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
@@ -64,16 +63,13 @@ export default class MarkDownEditorUI extends React.Component {
     };
 
     onClickNote(e, note) {
-        ipcRenderer.send("OPEN_NOTE", this.state.currentFolderPath + "/" + note + "/content.md");
+        ipcRenderer.send("OPEN_NOTE", note.path);
         ipcRenderer.once("NOTE_TEXT", (event, content) => {
             this.setState({
                 text: content
             });
         });
-        // TODO ノートのパスも最初から保持しておくべき
-        this.setState({ 
-            currentNote: note,
-            currentNotePath: this.state.currentFolderPath + "/" + note + "/content.md" });
+        this.setState({ currentNotePath: note.path });
     };
 
     refreshStorageList() {
@@ -88,7 +84,6 @@ export default class MarkDownEditorUI extends React.Component {
         this.setState({
             currentStoragePath: storage.path,
             currentFolderPath: init.folders[0].path,
-            currentNote: "",
             currentNotePath: "",
             text: "",
             storages: storages,
@@ -146,8 +141,8 @@ export default class MarkDownEditorUI extends React.Component {
                     createStorage={this.createStorage}
                 />
                 <NoteList
-                    noteList={this.getCurrentNoteList()}
-                    currentNote={this.state.currentNote}
+                    noteList={this.getCurrentNoteInfoList()}
+                    currentNotePath={this.state.currentNotePath}
                     onClickNote={this.onClickNote}
                 />
                 <div id="editorAndPreviewer" style={EDITOR_AND_PREVIERWER_STYLE}>
@@ -158,7 +153,7 @@ export default class MarkDownEditorUI extends React.Component {
         );
     }
  
-    getCurrentNoteList() {
+    getCurrentNoteInfoList() {
         const targetStorage = this.state.currentStoragePath;
         const targetFolder = this.state.currentFolderPath;
        
@@ -174,8 +169,8 @@ export default class MarkDownEditorUI extends React.Component {
         if (!folder) {
             return [];
         }
-        const noteList = folder.notes;
-        return noteList;
+        const notes = folder.notes;
+        return notes;
     }
 
 }

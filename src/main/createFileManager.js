@@ -63,8 +63,16 @@ class FileManager {
                 return;
             }
             
-            const notePaths = fs.readdirSync(absFolderPath);
-            folders.push({ name: folderPath, path: absFolderPath, notes: notePaths });
+            const noteIds = fs.readdirSync(absFolderPath);
+            const noteInfoList = [];
+            noteIds.forEach(noteId => {
+                const noteDirPath = path.join(absFolderPath, noteId);
+                const noteInfoFilePath = path.join(noteDirPath, "noteinfo.json");
+                const noteInfo = JSON.parse(fs.readFileSync(noteInfoFilePath, "utf8"));
+                noteInfoList.push(noteInfo);
+            });
+
+            folders.push({ name: folderPath, path: absFolderPath, notes: noteInfoList });
         });
         const structure = { name: storage.name, path: storage.path, folders: folders };
         return structure;

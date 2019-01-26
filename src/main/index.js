@@ -40,6 +40,28 @@ function loadMetaInfo() {
     }
     return JSON.parse(fileManager.load(metaFilePath)); 
 }
+    /* metaFile の構成
+    {
+        "storages": [
+            {
+              "name": "takanote",
+              "path": "/home/masayuki/takanote"
+            },
+            {
+              "name": "takanote2",
+              "path": "/home/masayuki/takanote2"
+            },
+            {
+              "name": "takanote3",
+              "path": "/home/masayuki/takanote3"
+            },
+            {
+              "name": "takanote4",
+              "path": "/home/masayuki/takanote4"
+            }
+        ]
+    }
+    */
 
 function updateMetaInfo(metaInfo) {
     const metaFilePath = fileManager.join(fileManager.getHomeDir(), ".takanote");
