@@ -88,6 +88,9 @@ export default class MarkDownEditorUI extends React.Component {
         this.setState({
             currentStoragePath: storage.path,
             currentFolderPath: init.folders[0].path,
+            currentNote: "",
+            currentNotePath: "",
+            text: "",
             storages: storages,
         });
     }
