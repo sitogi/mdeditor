@@ -1,6 +1,7 @@
 import React from "react";
 import { ipcRenderer } from "electron";
 import CreateStorageDialog from "./CreateStorageDialog";
+import CreateFolderDialog from "./CreateFolderDialog";
 
 const STORAGE_LIST_STYLE = {
     width: "10%",
@@ -32,7 +33,7 @@ export default class StorageList extends React.Component {
                 <div className="list-group-header" style={STYLE_HEADER}>
                     <div style={STYLE_FLEX_DIRECTION_ROW}>
                         <strong>Storages</strong>
-                        <CreateStorageDialog createStorage={this.props.createStorage}/>
+                        <CreateStorageDialog createStorage={this.props.createStorage} />
                     </div>
                 </div>
                 {this.props.storages.map(s => {
@@ -44,10 +45,12 @@ export default class StorageList extends React.Component {
                                  <span className="media-object icon icon-database pull-left" />
                                  <div id="storageName" className="media-body">
                                      <div>{s.name}</div>
+                                     <CreateFolderDialog createFolder={this.props.createFolder} />
                                  </div>
                               </div>
                               {s.folders.map(f => {
                                   const isSelected = f.path === this.props.currentFolderPath;
+                                  console.log("f.path: " + f.path + "    currentFolderPath: " + this.props.currentFolderPath);
                                   return (
                                       <div
                                         style={FOLDER_STYLE}

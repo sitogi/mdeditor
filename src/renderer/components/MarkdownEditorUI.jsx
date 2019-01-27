@@ -33,6 +33,7 @@ export default class MarkDownEditorUI extends React.Component {
         this.onClickCreateNote = this.onClickCreateNote.bind(this);
         this.refreshStorageList = this.refreshStorageList.bind(this);
         this.createStorage = this.createStorage.bind(this);
+        this.createFolder = this.createFolder.bind(this);
     }
 
     onChangeText(e) {
@@ -62,7 +63,9 @@ export default class MarkDownEditorUI extends React.Component {
     };
 
     onClickFolder(e, folder) {
+        console.log("onclickFolderセット前: " + this.state.currentFolderPath);
         this.setState({ currentFolderPath: folder.path });
+        console.log("onclickFolderセット後: " + this.state.currentFolderPath);
     };
 
     onClickNote(e, note) {
@@ -99,6 +102,20 @@ export default class MarkDownEditorUI extends React.Component {
         this.setState({
             currentStoragePath: storage.path,
             currentFolderPath: init.folders[0].path,
+            currentNotePath: "",
+            text: "",
+            storages: storages,
+        });
+    }
+
+    createFolder(folderName) {
+        const newFolder = { name: folderName, parentPath: this.state.currentStoragePath };
+        ipcRenderer.send("CREATE_FOLDER", newFolder);
+        const storages = this.refreshStorageList();
+        const newFolderPath = newFolder.parentPath + "/" + newFolder.name;
+
+        this.setState({
+            currentFolderPath: newFolderPath, // TODO なぜか更新できない
             currentNotePath: "",
             text: "",
             storages: storages,
@@ -154,6 +171,7 @@ export default class MarkDownEditorUI extends React.Component {
                     onClickStorage={this.onClickStorage}
                     onClickFolder={this.onClickFolder}
                     createStorage={this.createStorage}
+                    createFolder={this.createFolder}
                 />
                 <NoteList
                     noteList={this.getCurrentNoteInfoList()}

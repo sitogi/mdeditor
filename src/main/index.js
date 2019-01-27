@@ -108,9 +108,12 @@ ipcMain.on("GET_FOLDERS", (event, arg) => {
     console.log("GET_FOLDERS was called");
 });
 
-ipcMain.on("NEW_FOLDER", (event, arg) => {
-    // TODO
-    console.log("NEW_FOLDER");
+ipcMain.on("CREATE_FOLDER", (event, newFolder) => {
+    console.log("CREATE_FOLDER");
+    console.log(newFolder);
+    const newFolderPath = fileManager.join(newFolder.parentPath, newFolder.name);
+    console.log(newFolderPath);
+    fileManager.createDirectory(newFolderPath);
 });
 
 ipcMain.on("OPEN_NOTE", (event, filePath) => {
