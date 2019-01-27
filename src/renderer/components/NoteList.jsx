@@ -26,7 +26,10 @@ export default class NoteList extends React.Component {
             <div className="list-group" style={STYLE_NOTELIST}>
                 <div className="list-group-header" style={STYLE_HEADER}>
                     <strong>Notes</strong>
-                    <span className="icon icon-plus-squared pull-right" />
+                    <span
+                        className="icon icon-plus-squared pull-right"
+                        onClick={this.props.onClickCreateNote}
+                    />
                 </div>
                 {this.props.noteList.map(note => {
                     const isSelected = note.path === this.props.currentNotePath;

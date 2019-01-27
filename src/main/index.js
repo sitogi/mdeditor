@@ -121,6 +121,21 @@ ipcMain.on("OPEN_NOTE", (event, filePath) => {
         .catch((error) => event.sender.send("NOTE_TEXT", error.toString()));
 });
 
+ipcMain.on("CREATE_NOTE", (event, folderPath) => {
+    const noteDirPath = fileManager.join(folderPath, Date.now().toString()); // TODO to UUID
+    fileManager.createDirectory(noteDirPath);
+
+    const contentFilePath = fileManager.join(noteDirPath, "content.md");
+    console.log(contentFilePath);
+    fileManager.create(contentFilePath);
+
+    const noteInfoPath = fileManager.join(noteDirPath, "noteinfo.json");
+    const noteInfo = { path: contentFilePath, title: "Empty Note" };
+    fileManager.saveFileSync(noteInfoPath, JSON.stringify(noteInfo, null, "  "));
+
+    event.sender.send("NOTE_INFO", noteInfo.path);
+});
+
 ipcMain.on("WRITE_NOTE", (event, note) => {
     fileManager.saveFile(note.path, note.content);
 });

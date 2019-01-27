@@ -30,6 +30,7 @@ export default class MarkDownEditorUI extends React.Component {
         this.onClickStorage = this.onClickStorage.bind(this);
         this.onClickFolder = this.onClickFolder.bind(this);
         this.onClickNote = this.onClickNote.bind(this);
+        this.onClickCreateNote = this.onClickCreateNote.bind(this);
         this.refreshStorageList = this.refreshStorageList.bind(this);
         this.createStorage = this.createStorage.bind(this);
     }
@@ -71,6 +72,18 @@ export default class MarkDownEditorUI extends React.Component {
         });
         this.setState({ currentNotePath: note.path });
     };
+
+    onClickCreateNote(e) {
+        ipcRenderer.send("CREATE_NOTE", this.state.currentFolderPath);
+        ipcRenderer.once("NOTE_INFO", (event, notePath) => {
+            const storages = this.refreshStorageList();
+            this.setState({
+                text: "",
+                storages: storages,
+                currentNotePath: notePath,
+            });
+        });
+    }
 
     refreshStorageList() {
         const storages = ipcRenderer.sendSync("GET_STORAGES");
@@ -144,6 +157,7 @@ export default class MarkDownEditorUI extends React.Component {
                     noteList={this.getCurrentNoteInfoList()}
                     currentNotePath={this.state.currentNotePath}
                     onClickNote={this.onClickNote}
+                    onClickCreateNote={this.onClickCreateNote}
                 />
                 <div id="editorAndPreviewer" style={EDITOR_AND_PREVIERWER_STYLE}>
                     { this.renderEditor() }
