@@ -36,9 +36,11 @@ export default class MarkDownEditorUI extends React.Component {
     }
 
     onChangeText(e) {
-        this.setState({ text: e.target.value });
         const note = { path: this.state.currentNotePath, content: e.target.value};
         ipcRenderer.send("WRITE_NOTE", note);
+        // TODO いちいちストレージ一覧更新するのは重すぎるので構成を変えるべき
+        const storages = this.refreshStorageList();
+        this.setState({ storages: storages, text: e.target.value });
     }
 
     onKeyDown(e) {

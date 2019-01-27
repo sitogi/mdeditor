@@ -65,9 +65,7 @@ function loadMetaInfo() {
 
 function updateMetaInfo(metaInfo) {
     const metaFilePath = fileManager.join(fileManager.getHomeDir(), ".takanote");
-    // TODO ここから頑張る
     fileManager.saveFileSync(metaFilePath, JSON.stringify(metaInfo, null, "  "));
-
 }
 
 function exportPDF() {
@@ -137,8 +135,33 @@ ipcMain.on("CREATE_NOTE", (event, folderPath) => {
 });
 
 ipcMain.on("WRITE_NOTE", (event, note) => {
+    // ノート
     fileManager.saveFile(note.path, note.content);
+
+    // タイトル
+    const noteInfoPath = note.path.replace("content.md", "noteinfo.json");
+    const noteInfo = JSON.parse(fileManager.load(noteInfoPath));
+    noteInfo.title = createTitle(note.content);
+    fileManager.saveFileSync(noteInfoPath, JSON.stringify(noteInfo, null, "  "));
 });
+
+function createTitle(str) {
+    if (!str || str === "") {
+        return "Empty Note";
+    }
+
+    const firstLineSep = str.indexOf("\n");
+    if (firstLineSep === -1) {
+        return removeMetaChars(str).trim();
+    }
+
+    const firstLine = str.substring(0, firstLineSep);
+    return removeMetaChars(firstLine).trim();
+}
+
+function removeMetaChars(str) {
+    return str.replace(/#/g, "");
+}
 
 app.on("ready", () => {
     mainWindow = createMainWindow();
