@@ -23,17 +23,23 @@ const FOLDER_STYLE = {
 };
 
 
-
 export default class StorageList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.deleteDir = this.deleteDir.bind(this);
+        this.deleteStorage = this.deleteStorage.bind(this);
+        this.deleteFolder = this.deleteFolder.bind(this);
     }
 
-    deleteDir(path) {
+    deleteStorage(path) {
         // TODO 本来はダイアログを出すぐらい慎重になるべき
-        ipcRenderer.sendSync("DELETE_DIR", path);
+        ipcRenderer.sendSync("DELETE_STORAGE", path);
+        this.props.refreshStorages();
+    }
+
+    deleteFolder(path) {
+        // TODO 本来はダイアログを出すぐらい慎重になるべき
+        ipcRenderer.sendSync("DELETE_FOLDER", path);
         this.props.refreshStorages();
     }
 
@@ -55,7 +61,7 @@ export default class StorageList extends React.Component {
                                   className="list-group-item selected"
                                   onClick={e => this.props.onClickStorage(e, s)}
                                   onContextMenu={e => {
-                                      showContextMenu(e, [{ label: "Delete", action: () => this.deleteDir(s.path) }]);
+                                      showContextMenu(e, [{ label: "Delete", action: () => this.deleteStorage(s.path) }]);
                                   }}
                               >
                                  <span className="media-object icon icon-database pull-left" />
@@ -72,7 +78,7 @@ export default class StorageList extends React.Component {
                                         className={isSelected ? "list-group-item selected" : "list-group-item"}
                                         onClick={e => this.props.onClickFolder(e, f)}
                                         onContextMenu={e => {
-                                            showContextMenu(e, [{ label: "Delete", action: () => this.deleteDir(f.path) }]);
+                                            showContextMenu(e, [{ label: "Delete", action: () => this.deleteFolder(f.path) }]);
                                         }}
                                       >
                                           <span className="media-object icon icon-folder pull-left" />

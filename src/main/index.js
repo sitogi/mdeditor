@@ -143,7 +143,19 @@ ipcMain.on("WRITE_NOTE", (event, note) => {
     fileManager.saveFileSync(noteInfoPath, JSON.stringify(noteInfo, null, "  "));
 });
 
-ipcMain.on("DELETE_DIR", (event, path) => {
+ipcMain.on("DELETE_STORAGE", (event, path) => {
+    fileManager.deleteDirRecursive(path);
+
+    const metaInfo = loadMetaInfo();
+
+    // 削除
+    metaInfo.storages = metaInfo.storages.filter(s => s.path !== path);
+    updateMetaInfo(metaInfo);
+
+    event.returnValue = true;
+});
+
+ipcMain.on("DELETE_FOLDER", (event, path) => {
     fileManager.deleteDirRecursive(path);
     event.returnValue = true;
 });
