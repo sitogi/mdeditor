@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import del from "del";
 
 class FileManager {
 
@@ -46,6 +47,10 @@ class FileManager {
         fs.mkdirSync(path);
     }
 
+    deleteDirRecursive(path) {
+        del.sync(path, { force: true });
+    }
+
     getHomeDir() {
         return process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"];
     }
@@ -53,7 +58,7 @@ class FileManager {
     join(dirPath, fileName) {
         return path.join(dirPath, fileName);
     }
-    
+
     createStorageStructure(storage) {
         const folderPaths = fs.readdirSync(storage.path);
         const folders = [];
@@ -62,7 +67,7 @@ class FileManager {
             if (fs.statSync(absFolderPath).isFile()) {
                 return;
             }
-            
+
             const noteIds = fs.readdirSync(absFolderPath);
             const noteInfoList = [];
             noteIds.forEach(noteId => {

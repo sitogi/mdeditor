@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "css-loader": "^2.1.0",
+    "del": "^3.0.0",
     "electron": "^4.0.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.28.3",

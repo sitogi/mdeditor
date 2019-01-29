@@ -13,6 +13,11 @@ const EDITOR_AND_PREVIERWER_STYLE = {
     "width": "80%"
 };
 
+function getStorageList() {
+    const storages = ipcRenderer.sendSync("GET_STORAGES");
+    return storages;
+}
+
 export default class MarkDownEditorUI extends React.Component {
 
     constructor(props) {
@@ -31,7 +36,7 @@ export default class MarkDownEditorUI extends React.Component {
         this.onClickFolder = this.onClickFolder.bind(this);
         this.onClickNote = this.onClickNote.bind(this);
         this.onClickCreateNote = this.onClickCreateNote.bind(this);
-        this.refreshStorageList = this.refreshStorageList.bind(this);
+        this.refreshStorages = this.refreshStorages.bind(this);
         this.createStorage = this.createStorage.bind(this);
         this.createFolder = this.createFolder.bind(this);
     }
@@ -40,7 +45,7 @@ export default class MarkDownEditorUI extends React.Component {
         const note = { path: this.state.currentNotePath, content: e.target.value};
         ipcRenderer.send("WRITE_NOTE", note);
         // TODO いちいちストレージ一覧更新するのは重すぎるので構成を変えるべき
-        const storages = this.refreshStorageList();
+        const storages = getStorageList();
         this.setState({ storages: storages, text: e.target.value });
     }
 
@@ -79,7 +84,7 @@ export default class MarkDownEditorUI extends React.Component {
     onClickCreateNote(e) {
         ipcRenderer.send("CREATE_NOTE", this.state.currentFolderPath);
         ipcRenderer.once("NOTE_INFO", (event, notePath) => {
-            const storages = this.refreshStorageList();
+            const storages = getStorageList();
             this.setState({
                 text: "",
                 storages: storages,
@@ -88,14 +93,14 @@ export default class MarkDownEditorUI extends React.Component {
         });
     }
 
-    refreshStorageList() {
-        const storages = ipcRenderer.sendSync("GET_STORAGES");
-        return storages;
+    refreshStorages() {
+        const storages = getStorageList();
+        this.setState({ storages: storages });
     }
 
     createStorage(storage) {
         ipcRenderer.send("CREATE_STORAGE", storage);
-        const storages = this.refreshStorageList();
+        const storages = getStorageList();
         const init = storages.find(s => s.path === storage.path);
         this.setState({
             currentStoragePath: storage.path,
@@ -109,19 +114,24 @@ export default class MarkDownEditorUI extends React.Component {
     createFolder(folderName) {
         const newFolder = { name: folderName, parentPath: this.state.currentStoragePath };
         ipcRenderer.send("CREATE_FOLDER", newFolder);
-        const storages = this.refreshStorageList();
         const newFolderPath = newFolder.parentPath + "/" + newFolder.name;
 
-        this.setState({
-            currentFolderPath: newFolderPath, // TODO なぜか更新できない
-            currentNotePath: "",
-            text: "",
-            storages: storages,
-        });
+        const update = (state, props) => {
+            const storages = getStorageList();
+            return { storages: storages };
+        };
+        const callback = () => {
+            this.setState({
+                currentNotePath: "",
+                text: "",
+                currentFolderPath: newFolderPath,
+        })};
+        // storages の更新が完了後に currentFolderPath を更新しないと反映が遅れる
+        this.setState(update, callback);
     }
 
     componentDidMount() {
-        const storages = this.refreshStorageList();
+        const storages = getStorageList();
         this.setState({ storages: storages });
 
         ipcRenderer.on("REQUEST_TEXT", () => {
@@ -170,6 +180,7 @@ export default class MarkDownEditorUI extends React.Component {
                     onClickFolder={this.onClickFolder}
                     createStorage={this.createStorage}
                     createFolder={this.createFolder}
+                    refreshStorages={this.refreshStorages}
                 />
                 <NoteList
                     noteList={this.getCurrentNoteInfoList()}

@@ -1,7 +1,8 @@
 import React from "react";
-import { ipcRenderer, remote } from "electron";
+import { ipcRenderer } from "electron";
 import CreateStorageDialog from "./CreateStorageDialog";
 import CreateFolderDialog from "./CreateFolderDialog";
+import showContextMenu from "./showContextMenu";
 
 const STORAGE_LIST_STYLE = {
     width: "10%",
@@ -21,21 +22,19 @@ const FOLDER_STYLE = {
     "text-indent": "0.5em",
 };
 
+
+
 export default class StorageList extends React.Component {
 
     constructor(props) {
         super(props);
+        this.deleteDir = this.deleteDir.bind(this);
     }
 
-    showContextMenu(e) {
-        e.preventDefault();
-        let menu = remote.Menu.buildFromTemplate([
-            {role:'copy'},
-            {role:'cut'},
-            {role:'paste'},
-        ]);
-        menu.popup();
-        return false;
+    deleteDir(path) {
+        // TODO 本来はダイアログを出すぐらい慎重になるべき
+        ipcRenderer.sendSync("DELETE_DIR", path);
+        this.props.refreshStorages();
     }
 
     render() {
@@ -55,7 +54,9 @@ export default class StorageList extends React.Component {
                               <div
                                   className="list-group-item selected"
                                   onClick={e => this.props.onClickStorage(e, s)}
-                                  onContextMenu={this.showContextMenu}
+                                  onContextMenu={e => {
+                                      showContextMenu(e, [{ label: "Delete", action: () => this.deleteDir(s.path) }]);
+                                  }}
                               >
                                  <span className="media-object icon icon-database pull-left" />
                                  <div id="storageName" className="media-body">
@@ -70,6 +71,9 @@ export default class StorageList extends React.Component {
                                         style={FOLDER_STYLE}
                                         className={isSelected ? "list-group-item selected" : "list-group-item"}
                                         onClick={e => this.props.onClickFolder(e, f)}
+                                        onContextMenu={e => {
+                                            showContextMenu(e, [{ label: "Delete", action: () => this.deleteDir(f.path) }]);
+                                        }}
                                       >
                                           <span className="media-object icon icon-folder pull-left" />
                                           <div id="folderName" className="media-body">
@@ -82,11 +86,15 @@ export default class StorageList extends React.Component {
                        );
                    } else {
                        return (
-                          <div className="list-group-item" onClick={e => this.props.onClickStorage(e, s)}>
-                            <span className="media-object icon icon-database pull-left" />
+                          <div
+                              className="list-group-item"
+                              onClick={e => this.props.onClickStorage(e, s)}
+                              onContextMenu={e => showContextMenu(e, s.path)}
+                          >
+                            <span className="media-object icon icon-database pull-left"  />
                             <div id="storageName" className="media-body">
                                 <div>{s.name}</div>
-                             </div>
+                            </div>
                           </div>
                        );
                    }
@@ -94,6 +102,6 @@ export default class StorageList extends React.Component {
             </div>
         );
     }
-    
+
 }
 

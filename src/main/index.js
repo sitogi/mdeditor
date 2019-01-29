@@ -143,6 +143,11 @@ ipcMain.on("WRITE_NOTE", (event, note) => {
     fileManager.saveFileSync(noteInfoPath, JSON.stringify(noteInfo, null, "  "));
 });
 
+ipcMain.on("DELETE_DIR", (event, path) => {
+    fileManager.deleteDirRecursive(path);
+    event.returnValue = true;
+});
+
 function createTitle(str) {
     if (!str || str === "") {
         return "Empty Note";
