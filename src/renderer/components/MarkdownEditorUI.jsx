@@ -63,9 +63,7 @@ export default class MarkDownEditorUI extends React.Component {
     };
 
     onClickFolder(e, folder) {
-        console.log("onclickFolderセット前: " + this.state.currentFolderPath);
         this.setState({ currentFolderPath: folder.path });
-        console.log("onclickFolderセット後: " + this.state.currentFolderPath);
     };
 
     onClickNote(e, note) {
@@ -157,7 +155,7 @@ export default class MarkDownEditorUI extends React.Component {
             />
         );
     }
-        
+
     render() {
         return (
             <div className={style.markdownEditor}
@@ -186,15 +184,15 @@ export default class MarkDownEditorUI extends React.Component {
             </div>
         );
     }
- 
+
     getCurrentNoteInfoList() {
         const targetStorage = this.state.currentStoragePath;
         const targetFolder = this.state.currentFolderPath;
-       
+
         if (!targetStorage || !targetFolder) {
             return [];
         }
-        
+
         const storage = this.state.storages.find(s => s.path === targetStorage);
         if (!storage) {
             return [];

@@ -38,7 +38,7 @@ function loadMetaInfo() {
     if (!fileManager.exist(metaFilePath)) {
         fileManager.create(metaFilePath);
     }
-    return JSON.parse(fileManager.load(metaFilePath)); 
+    return JSON.parse(fileManager.load(metaFilePath));
 }
     /* metaFile の構成
     {
@@ -91,7 +91,7 @@ ipcMain.on("CREATE_STORAGE", (event, storage) => {
     fileManager.createDirectory(storage.path);
     fileManager.createDirectory(fileManager.join(storage.path, "default"));
 
-    const metaInfo = loadMetaInfo(); 
+    const metaInfo = loadMetaInfo();
     metaInfo.storages.push({name: storage.name, path: storage.path});
 
     updateMetaInfo(metaInfo);
@@ -105,14 +105,10 @@ ipcMain.on("GET_STORAGES", (event, arg) => {
 
 ipcMain.on("GET_FOLDERS", (event, arg) => {
     // TODO
-    console.log("GET_FOLDERS was called");
 });
 
 ipcMain.on("CREATE_FOLDER", (event, newFolder) => {
-    console.log("CREATE_FOLDER");
-    console.log(newFolder);
     const newFolderPath = fileManager.join(newFolder.parentPath, newFolder.name);
-    console.log(newFolderPath);
     fileManager.createDirectory(newFolderPath);
 });
 
@@ -127,7 +123,6 @@ ipcMain.on("CREATE_NOTE", (event, folderPath) => {
     fileManager.createDirectory(noteDirPath);
 
     const contentFilePath = fileManager.join(noteDirPath, "content.md");
-    console.log(contentFilePath);
     fileManager.create(contentFilePath);
 
     const noteInfoPath = fileManager.join(noteDirPath, "noteinfo.json");

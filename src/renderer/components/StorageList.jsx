@@ -1,5 +1,5 @@
 import React from "react";
-import { ipcRenderer } from "electron";
+import { ipcRenderer, remote } from "electron";
 import CreateStorageDialog from "./CreateStorageDialog";
 import CreateFolderDialog from "./CreateFolderDialog";
 
@@ -27,6 +27,17 @@ export default class StorageList extends React.Component {
         super(props);
     }
 
+    showContextMenu(e) {
+        e.preventDefault();
+        let menu = remote.Menu.buildFromTemplate([
+            {role:'copy'},
+            {role:'cut'},
+            {role:'paste'},
+        ]);
+        menu.popup();
+        return false;
+    }
+
     render() {
         return (
             <div className="list-group" style={STORAGE_LIST_STYLE}>
@@ -41,7 +52,11 @@ export default class StorageList extends React.Component {
                    if (isSelected) {
                        return (
                           <div>
-                              <div className="list-group-item selected" onClick={e => this.props.onClickStorage(e, s)}>
+                              <div
+                                  className="list-group-item selected"
+                                  onClick={e => this.props.onClickStorage(e, s)}
+                                  onContextMenu={this.showContextMenu}
+                              >
                                  <span className="media-object icon icon-database pull-left" />
                                  <div id="storageName" className="media-body">
                                      <div>{s.name}</div>
@@ -50,7 +65,6 @@ export default class StorageList extends React.Component {
                               </div>
                               {s.folders.map(f => {
                                   const isSelected = f.path === this.props.currentFolderPath;
-                                  console.log("f.path: " + f.path + "    currentFolderPath: " + this.props.currentFolderPath);
                                   return (
                                       <div
                                         style={FOLDER_STYLE}
