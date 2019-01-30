@@ -29,6 +29,7 @@ export default class MarkDownEditorUI extends React.Component {
             currentStoragePath: "",
             currentFolderPath: "",
             currentNotePath: "",
+            notes: [],
         };
         this.onChangeText = this.onChangeText.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
@@ -37,6 +38,7 @@ export default class MarkDownEditorUI extends React.Component {
         this.onClickNote = this.onClickNote.bind(this);
         this.onClickCreateNote = this.onClickCreateNote.bind(this);
         this.refreshStorages = this.refreshStorages.bind(this);
+        this.refreshNotes = this.refreshNotes.bind(this);
         this.createStorage = this.createStorage.bind(this);
         this.createFolder = this.createFolder.bind(this);
     }
@@ -59,17 +61,38 @@ export default class MarkDownEditorUI extends React.Component {
     }
 
     onClickStorage(e, storage) {
-        this.setState(
-            {
-                currentStoragePath: storage.path,
-                currentFolderPath: ""
-            }
-        );
-    };
+        if (this.state.currentStoragePath !== storage.path) {
+            const update = (state, props) => {
+                return {
+                    currentStoragePath: storage.path,
+                    currentFolderPath: "",
+                    currentNotePath: "",
+                };
+            };
+            const callback = () => {
+                const notes = this.getCurrentNoteInfoList();
+                this.setState({ notes: notes, text: "" });
+            };
+            this.setState(update, callback);
+        }
+    }
 
     onClickFolder(e, folder) {
-        this.setState({ currentFolderPath: folder.path });
-    };
+        if (this.state.currentFolderPath !== folder.path) {
+            const update = (state, props) => {
+               return {
+                  currentFolderPath: folder.path,
+                  currentNotePath: "",
+               };
+            };
+            const callback = () => {
+                const notes = this.getCurrentNoteInfoList();
+                this.setState({ notes: notes });
+            };
+            // currentFolderPath の更新が完了後に notes を更新する
+            this.setState(update, callback);
+        }
+    }
 
     onClickNote(e, note) {
         ipcRenderer.send("OPEN_NOTE", note.path);
@@ -79,7 +102,7 @@ export default class MarkDownEditorUI extends React.Component {
             });
         });
         this.setState({ currentNotePath: note.path });
-    };
+    }
 
     onClickCreateNote(e) {
         ipcRenderer.send("CREATE_NOTE", this.state.currentFolderPath);
@@ -90,25 +113,90 @@ export default class MarkDownEditorUI extends React.Component {
                 storages: storages,
                 currentNotePath: notePath,
             });
+
+            const update = (state, props) => {
+                const storages = getStorageList();
+                return {
+                    storages: storages,
+                    currentNotePath: notePath,
+                 };
+            };
+            const callback = () => {
+                const notes = this.getCurrentNoteInfoList();
+                this.setState({
+                    notes: notes,
+                    text: "",
+                });
+            };
+            // storages の更新が完了後に notes を更新する
+            this.setState(update, callback);
+
         });
     }
 
     refreshStorages() {
-        const storages = getStorageList();
-        this.setState({ storages: storages });
+        this.refreshNotes();
+  //      const storages = getStorageList();
+   //     this.setState({ storages: storages });
+    }
+
+    refreshNotes() {
+        const update = (state, props) => {
+            const storages = getStorageList();
+            return { storages: storages };
+        };
+        const callback = () => {
+            const notes = this.getCurrentNoteInfoList();
+            this.setState({ notes: notes, text: ""  });
+        };
+        // storages の更新が完了後に notes を更新する
+        this.setState(update, callback);
+   }
+
+    getCurrentNoteInfoList() {
+        const targetStorage = this.state.currentStoragePath;
+        const targetFolder = this.state.currentFolderPath;
+
+        if (!targetStorage || !targetFolder) {
+            return [];
+        }
+
+        const storage = this.state.storages.find(s => s.path === targetStorage);
+        if (!storage) {
+            return [];
+        }
+        const folder = storage.folders.find(f => f.path === targetFolder);
+        if (!folder) {
+            return [];
+        }
+        const notes = folder.notes;
+        return notes;
     }
 
     createStorage(storage) {
         ipcRenderer.send("CREATE_STORAGE", storage);
-        const storages = getStorageList();
-        const init = storages.find(s => s.path === storage.path);
-        this.setState({
-            currentStoragePath: storage.path,
-            currentFolderPath: init.folders[0].path,
-            currentNotePath: "",
-            text: "",
-            storages: storages,
-        });
+
+        const update = (state, props) => {
+            const storages = getStorageList();
+            const init = storages.find(s => s.path === storage.path);
+            return {
+                currentStoragePath: storage.path,
+                currentFolderPath: init.folders[0].path,
+                currentNotePath: "",
+                text: "",
+                storages: storages,
+            };
+        };
+
+        const callback = () => {
+            this.setState({
+                notes: this.getCurrentNoteInfoList(),
+                currentNotePath: "",
+                text: "",
+            });
+        };
+
+        this.setState(update, callback);
     }
 
     createFolder(folderName) {
@@ -118,13 +206,16 @@ export default class MarkDownEditorUI extends React.Component {
 
         const update = (state, props) => {
             const storages = getStorageList();
-            return { storages: storages };
+            return {
+                storages: storages,
+                currentFolderPath: newFolderPath,
+             };
         };
         const callback = () => {
             this.setState({
+                notes: this.getCurrentNoteInfoList(),
                 currentNotePath: "",
                 text: "",
-                currentFolderPath: newFolderPath,
         })};
         // storages の更新が完了後に currentFolderPath を更新しないと反映が遅れる
         this.setState(update, callback);
@@ -187,6 +278,7 @@ export default class MarkDownEditorUI extends React.Component {
                     currentNotePath={this.state.currentNotePath}
                     onClickNote={this.onClickNote}
                     onClickCreateNote={this.onClickCreateNote}
+                    refreshNotes={this.refreshNotes}
                 />
                 <div id="editorAndPreviewer" style={EDITOR_AND_PREVIERWER_STYLE}>
                     { this.renderEditor() }
@@ -194,26 +286,6 @@ export default class MarkDownEditorUI extends React.Component {
                 </div>
             </div>
         );
-    }
-
-    getCurrentNoteInfoList() {
-        const targetStorage = this.state.currentStoragePath;
-        const targetFolder = this.state.currentFolderPath;
-
-        if (!targetStorage || !targetFolder) {
-            return [];
-        }
-
-        const storage = this.state.storages.find(s => s.path === targetStorage);
-        if (!storage) {
-            return [];
-        }
-        const folder = storage.folders.find(f => f.path === targetFolder);
-        if (!folder) {
-            return [];
-        }
-        const notes = folder.notes;
-        return notes;
     }
 
 }

@@ -1,4 +1,8 @@
 import React from "react";
+import { ipcRenderer } from "electron";
+
+import showContextMenu from "./showContextMenu";
+import path from "path";
 
 const STYLE_NOTELIST = {
     width: "10%",
@@ -16,11 +20,18 @@ const STYLE_ICON = {
 };
 
 export default class NoteList extends React.Component {
-    
+
     constructor(props) {
         super(props);
     }
-    
+
+    deleteNote(path) {
+        // TODO 本来はダイアログを出すぐらい慎重になるべき
+        console.log(path);
+        ipcRenderer.sendSync("DELETE_NOTE", path);
+        this.props.refreshNotes();
+    }
+
     render() {
         return (
             <div className="list-group" style={STYLE_NOTELIST}>
@@ -37,10 +48,13 @@ export default class NoteList extends React.Component {
                         <div
                             className={isSelected ? "list-group-item selected" : "list-group-item"}
                             onClick={e => this.props.onClickNote(e, note)}
+                            onContextMenu={e => {
+                                showContextMenu(e, [{ label: "Delete", action: () => this.deleteNote(path.dirname(note.path)) }]);
+                            }}
                         >
                             <span className="media-object icon icon-doc-text pull-left" />
                             <div id="noteName" className="media-body">
-                                <div>{note.title}</div> 
+                                <div>{note.title}</div>
                             </div>
                         </div>
                     );
